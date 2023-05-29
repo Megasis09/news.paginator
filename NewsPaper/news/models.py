@@ -78,7 +78,7 @@ class Comment(models.Model):
         self.save()
 
 
-class Article:
+class Article(models.Model):
     def __init__(self, title, author, content, date):
         self.title = title
         self.author = author

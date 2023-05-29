@@ -12,7 +12,7 @@ urlpatterns = [
     path('<int:pk>/edit/', views.edit_article, name='edit-article'),
     path('<int:pk>/delete/', views.delete_article, name='delete-article'),
     path('', views.index, name='index'),
-    path('search/', views.search_news, name='search'),
+    path('news/search/', search, name='search'),
     path('details/<int:news_id>/', views.details, name='details'),
 ]
 

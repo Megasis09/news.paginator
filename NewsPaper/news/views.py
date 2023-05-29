@@ -15,25 +15,11 @@ def news(request):
     return render(request, 'news.html', context)
 
 
-def search_news(request):
-    if request.method == 'GET':
-        q_title = request.GET.get('title', '')
-        q_category = request.GET.get('category', '')
-        q_date = request.GET.get('date', '')
-
-        news_list = News.objects.filter(
-            Q(title__icontains=q_title),
-            Q(category__icontains=q_category),
-            Q(pub_date__gte=q_date) if q_date else Q()
-        ).order_by('-pub_date')
-
-        context = {
-            'news_list': news_list,
-            'q_title': q_title,
-            'q_category': q_category,
-            'q_date': q_date,
-        }
-        return render(request, 'news/search.html', context)
+def search(request):
+    query = request.GET.get('q')
+    results = News.objects.filter(Q(title__contains=query) | Q(tags__contains=query) | Q(date__contains=query))
+    context = {'results': results}
+    return render(request, 'search.html', context)
 
 def create_news(request):
     if request.method == 'POST':
