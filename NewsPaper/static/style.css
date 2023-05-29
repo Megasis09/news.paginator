@@ -1,0 +1,21 @@
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination a,
+.pagination span {
+  margin: 0 10px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+.current-page {
+  font-weight: bold;
+}
+
+.total-pages {
+  margin: 0 20px;
+}
