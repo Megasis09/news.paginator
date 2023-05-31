@@ -6,7 +6,14 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django_filters import FilterSet, DateTimeFilter, CharFilter, ChoiceFilter
 from django.forms import DateTimeInput
-from .models import Article, News
+
+
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.utils.translation import gettext_lazy as _
+
+
+
 
 
 class Author(models.Model):
@@ -28,6 +35,7 @@ class Author(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
+
 
 
 class Post(models.Model):
@@ -79,82 +87,52 @@ class Comment(models.Model):
 
 
 class Article(models.Model):
-    def __init__(self, title, author, content, date):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    likes = models.ManyToManyField(User, related_name='likes', blank=True)
+
+    def get_news(self):
+        from . import News
+        return News.objects.filter(article=self)
+
+class News(models.Model):
+    def init(self, title, author, content, timestamp):
         self.title = title
         self.author = author
         self.content = content
-        self.date = date
+        self.timestamp = timestamp
 
-    def get_title(self):
+        def get_title(self):
+            return self.title
 
-        return self.title
+        def get_author(self):
+            return self.author
 
-    def get_author(self):
+        def get_content(self):
+            return self.content
 
-        return self.author
+        def get_timestamp(self):
+            return self.timestamp
 
-    def get_content(self):
+        def set_title(self, title):
+            self.title = title
 
-        return self.content
+        def set_author(self, author):
+            self.author = author
 
-    def get_date(self):
+        def set_content(self, content):
+            self.content = content
 
-        return self.date
-
-class ArticleCreateView(CreateView):
-    model = Article
-    fields = ['title', 'content']
-    template_name = 'articles/article_form.html'
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-
-
-class ArticleUpdateView(UpdateView):
-    model = Article
-    fields = ['title', 'content']
-    template_name = 'articles/article_form.html'
-
-class ArticleDeleteView(DeleteView):
-    model = Article
-    success_url = reverse_lazy('home')
-    template_name = 'articles/article_confirm_delete.html'
-
-class NewsCreateView(CreateView):
-    model = News
-    fields = ['title', 'content']
-    template_name = 'news/news_form.html'
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-
-class NewsUpdateView(UpdateView):
-    model = News
-    fields = ['title', 'content']
-    template_name = 'news/news_form.html'
-
-class NewsDeleteView(DeleteView):
-    model = News
-    success_url = reverse_lazy('home')
-    template_name = 'news/news_confirm_delete.html'
-
-class NewsFilter(FilterSet):
-    title = CharFilter(field_name='title', lookup_expr='icontains')
-    category = ChoiceFilter(field_name='category', choices=News.CATEGORIES)
-    published_after = DateTimeFilter(
-    field_name='published_at',
-    lookup_expr='gt',
-    widget=DateTimeInput(
-    format='%Y-%m-%dT%H:%M',
-    attrs={'type': 'datetime-local'},
-    ),
-    )
+        def set_timestamp(self, timestamp):
+            self.timestamp = timestamp
 
     class Meta:
-        model = News
-        fields = {
-            'title': ['icontains'],
-            'tag': ['icontains'],
-        }
+        model = User
+        fields = ("username",)
+        field_classes = {"username": UsernameField}
+
+
+
+
+

@@ -1,6 +1,9 @@
 from .views import news_list_view, news_detail_view
 from django.urls import path
 from . import views
+from django.contrib import admin
+from django.urls import path, include
+
 
 urlpatterns = [
     path('create/', views.create_news, name='create-news'),
@@ -14,5 +17,9 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('news/search/', views.search_news, name='search'),
     path('details/<int:news_id>/', views.details, name='details'),
+    path('admin/', admin.site.urls),
+    path("accounts/", include("allauth.urls")),
+    path('news/', include('simpleapp.urls')),
+
 ]
 

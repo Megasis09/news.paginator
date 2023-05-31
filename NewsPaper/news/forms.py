@@ -13,3 +13,8 @@ class NewsEditForm(forms.ModelForm):
     class Meta:
         model = News
         fields = ('title', 'text', 'image')
+
+class ArticleForm(forms.ModelForm):
+    class Meta:
+        model = News
+        fields = ('title', 'text', 'image')
