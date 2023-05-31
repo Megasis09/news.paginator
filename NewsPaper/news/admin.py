@@ -1,9 +1,12 @@
-from django.contrib import admin
-from .models import *
-from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import Group, Permission
+from .models import Article, News
 
-# AdminSite.register(PostCategory)
-# AdminSite.register(Author)
-# AdminSite.register(Category)
-# AdminSite.register(Post)
-# AdminSite.register(Comment)
+
+authors_group, _ = Group.objects.get_or_create(name='authors')
+
+
+article_permissions = Permission.objects.filter(content_type__model='article')
+authors_group.permissions.set(article_permissions)
+
+news_permissions = Permission.objects.filter(content_type__model='news')
+authors_group.permissions.set(news_permissions)

@@ -5,12 +5,12 @@ from django.core.paginator import Paginator
 from .filters import NewsFilter
 
 from .models import Article
-
-from django.utils.translation import reverse_lazy
+from .models import News
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import News
+
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
@@ -49,93 +49,56 @@ def search(request):
     context = {'results': results}
     return render(request, 'search.html', context)
 
-class NewsList(ListView):
-    model = News
-    ordering = 'name'
-    template_name = 'news.html'
-    context_object_name = 'news'
-    paginate_by = 2
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        self.filterset = NewsFilter(self.request.GET, queryset)
-        return self.filterset.qs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['filterset'] = self.filterset
-        return context
-
-
-class NewsDetail(DetailView):
-    model = News
-    template_name = 'news.html'
-    context_object_name = 'News'
-
-
-class NewsCreate(PermissionRequiredMixin, CreateView):
-    permission_required = ('simpleapp.add_news',)
-    form_class = NewsForm
-    model = News
-    template_name = 'edit_news.html'
-
-
-class NewsUpdate(PermissionRequiredMixin, UpdateView):
-    permission_required = ('simpleapp.change_news',)
-    form_class = NewsForm
-    model = News
-    template_name = 'edit_news.html'
-
-
-class ProductDelete(PermissionRequiredMixin, DeleteView):
-    permission_required = ('simpleapp.delete_news',)
-    model = News
-    template_name = 'delete_news.html'
-    success_url = reverse_lazy('news_list')
-
-class ArticleList(ListView):
+class ArticleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Article
-    ordering = 'name'
-    template_name = 'news.html'
-    context_object_name = 'article'
-    paginate_by = 2
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        self.filterset = NewsFilter(self.request.GET, queryset)
-        return self.filterset.qs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['filterset'] = self.filterset
-        return context
+    fields = ['title', 'content']
 
 
-class ArticleDetail(DetailView):
+    def test_func(self):
+        return self.request.user.groups.filter(name='authors').exists()
+
+
+    def get_success_url(self):
+        return reverse('article_list')
+
+
+class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Article
-    template_name = 'news.html'
-    context_object_name = 'Article'
+    fields = ['title', 'content']
 
 
-class ArticleCreate(PermissionRequiredMixin, CreateView):
-    permission_required = ('simpleapp.add_article',)
-    form_class = NewsForm
-    model = Article
-    template_name = 'edit_article.html'
+    def test_func(self):
+        return self.request.user.groups.filter(name='authors').exists()
 
 
-class ProductUpdate(PermissionRequiredMixin, UpdateView):
-    permission_required = ('simpleapp.change_product',)
-    form_class = NewsForm
+    def get_success_url(self):
+        return reverse('article_list')
+
+
+class NewsCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = News
-    template_name = 'edit_news.html'
+    fields = ['title', 'content']
 
 
-class ArticleDelete(PermissionRequiredMixin, DeleteView):
-    permission_required = ('simpleapp.delete_article',)
-    model = Article
-    template_name = 'delete_article.html'
-    success_url = reverse_lazy('article_list')
+    def test_func(self):
+        return self.request.user.groups.filter(name='authors').exists()
+
+
+    def get_success_url(self):
+        return reverse('news_list')
+
+
+class NewsUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = News
+    fields = ['title', 'content']
+
+
+    def test_func(self):
+        return self.request.user.groups.filter(name='authors').exists()
+
+
+    def get_success_url(self):
+        return reverse('news_list')
 
 
 
