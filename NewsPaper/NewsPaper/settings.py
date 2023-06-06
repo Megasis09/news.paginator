@@ -39,11 +39,55 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.yandex',
+    'django_apscheduler',
+]
+
+SCHEDULER_AUTOSTART = True
+SCHEDULER_RUN_AT_TIMES = ['18:00']
+SCHEDULER_TIMEZONE = 'UTC'
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW = True
+APSCHEDULER_SCHEDULER_DEFAULTS = {
+    'coalesce': False,
+    'max_instances': 1
+}
+APSCHEDULER_JOBSTORES = {
+    'default': {
+        'type': 'memory',
+    }
+}
+APSCHEDULER_EXECUTORS = {
+    'default': {
+        'class': 'apscheduler.executors.pool:ThreadPoolExecutor',
+        'max_workers': '20'
+    }
+}
+APSCHEDULER_JOBS = [
+    {
+        'id': 'send_articles_email',
+        'func': 'articles.tasks.send_articles_email',
+        'trigger': 'cron',
+        'day_of_week': 'fri',
+        'hour': 18,
+        'minute': 0,
+        'replace_existing': True,
+        'misfire_grace_time': 3600
+    }
 ]
 
 ADMINS = [
     ('Megasis', 'icefrost12345@mail.ru'),
 ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'icefrost12345@mail.ru'
+EMAIL_HOST_PASSWORD = 'qweqweqwe'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = 'icefrost12345@mail.ru'
 
 LOGIN_REDIRECT_URL = "/news"
 

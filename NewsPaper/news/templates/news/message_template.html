@@ -1,0 +1,10 @@
+{% if articles %}
+    <h2>New articles:</h2>
+    <ul>
+        {% for article in articles %}
+            <li><a href="{{ article.url }}">{{ article.title }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No new articles this week.</p>
+{% endif %}

@@ -3,7 +3,8 @@ from django.urls import path
 from . import views
 from django.contrib import admin
 from django.urls import path, include
-
+from .management.commands.runapscheduler import Command
+from news.views import CategoryListView, subscribe
 
 urlpatterns = [
     path('create/', views.create_news, name='create-news'),
@@ -20,6 +21,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path('news/', include('simpleapp.urls')),
-
+    path('subscriptions/', views.subscriptions, name='subscriptions'),
 ]
+
+try:
+    command = Command()
+    command.handle()
+except Exception as e:
+    logging.exception("Failed to start APScheduler: %s" % e)
 
