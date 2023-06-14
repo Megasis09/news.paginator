@@ -11,6 +11,19 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import redis
+
+red = redis.Redis(
+    host='redis-14899.c276.us-east-1-2.ec2.cloud.redislabs.com',
+    port=14899,
+    password='pcuCjsagi3Ln1NOdqT85PUlCYfygoZVz'
+)
+
+CELERY_BROKER_URL = 'redis://default:pcuCjsagi3Ln1NOdqT85PUlCYfygoZVz@endpoint:14899'
+CELERY_RESULT_BACKEND = 'redis://default:pcuCjsagi3Ln1NOdqT85PUlCYfygoZVz@endpoint:14899'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent

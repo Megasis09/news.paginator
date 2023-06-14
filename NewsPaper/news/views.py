@@ -18,6 +18,15 @@ from django.views.generic import (
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.shortcuts import render
+from django.views import View
+from .tasks import send_newsletter
+
+class NewsletterView(View):
+    def get(self, request):
+        send_newsletter.apply_async(eta=datetime.now().replace(hour=8, minute=0, second=0, microsecond=0).replace(day=datetime.now().weekday()))
+        return render(request, 'newsletter_sent.html')
+
 class Subscriber(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(max_length=100)

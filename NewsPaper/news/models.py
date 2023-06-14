@@ -12,6 +12,34 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
+from django.db import models
+from django.urls import reverse
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.core.mail import send_mail
+from django.conf import settings
+
+class News(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    pub_date = models.DateTimeField(auto_now_add=True)
+
+    def get_absolute_url(self):
+        return reverse('news_detail', args=[str(self.id)])
+
+class Subscriber(models.Model):
+    email = models.EmailField()
+
+    def __str__(self):
+        return self.email
+
+@receiver(post_save, sender=News)
+def send_notification(sender, instance, **kwargs):
+    subject = 'New news: {0}'.format(instance.title)
+    message = 'Check out the latest news on our website!\n\n{0}'.format(instance.get_absolute_url())
+    from_email = settings.EMAIL_HOST_USER
+    recipient_list = [subscriber.email for subscriber in Subscriber.objects.all()]
+    send_mail(subject, message, from_email, recipient_list, fail_silently=True)
 
 
 
