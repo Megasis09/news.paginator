@@ -9,9 +9,72 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from django.core.cache import cache
+from django.conf import settings
 from pathlib import Path
 import redis
+import logging
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+        },
+        'errors_log': {
+            'class': 'logging.FileHandler',
+            'filename': '/path/to/errors.log',
+            'level': 'ERROR',
+            'formatter': 'errors_formatter',
+        },
+        'security_log': {
+            'class': 'logging.FileHandler',
+            'filename': '/path/to/security.log',
+            'level': 'DEBUG',
+            'formatter': 'security_formatter',
+        },
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler',
+            'level': 'ERROR',
+            'include_html': True,
+            'formatter': 'errors_formatter',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['errors_log', 'mail_admins'],
+            'level': 'ERROR',
+        },
+        'django.server': {
+            'handlers': ['errors_log', 'mail_admins'],
+            'level': 'ERROR',
+        },
+        'django.template': {
+            'handlers': ['errors_log'],
+            'level': 'ERROR',
+        },
+        'django.db.backends': {
+            'handlers': ['errors_log'],
+            'level': 'ERROR',
+        },
+        'django.security': {
+            'handlers': ['security_log'],
+            'level': 'DEBUG',
+        },
+    },
+    'formatters': {
+        'errors_formatter': {
+            'format': '{asctime} {levelname}: {message} (Source: {pathname} - {funcName} - {lineno})',
+            'style': '{',
+        },
+        'security_formatter': {
+            'format': '{asctime} {levelname}: {module} - {message}',
+            'style': '{',
+        },
+    },
+}
 
 red = redis.Redis(
     host='redis-14899.c276.us-east-1-2.ec2.cloud.redislabs.com',
@@ -119,7 +182,30 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_cache_backend.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:8000',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 300
+CACHE_MIDDLEWARE_SECONDS_HOME = 60
+
+CACHE_MIDDLEWARE_SECONDS_NAVIGATION = 10
+@register.simple_tag
+@cache_for(CACHE_MIDDLEWARE_SECONDS_NAVIGATION)
+def navigation():
+    return '<nav><ul><li>Link 1</li><li>Link 2</li><li>Link 3</li></ul></nav>'
 
 SITE_ID = 1
 
@@ -197,3 +283,5 @@ STATIC_URL = 'static/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+

@@ -8,7 +8,7 @@ from .models import Subscriber
 from .models import Article, News, Post, Category
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import (
@@ -18,9 +18,31 @@ from django.views.generic import (
 from django.db import models
 from django.contrib.auth.models import User
 
-from django.shortcuts import render
+
 from django.views import View
 from .tasks import send_newsletter
+
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.shortcuts import render
+
+
+
+def article_detail(request, article_id):
+    article = get_article(article_id)
+    context = {'article': article}
+    return render(request, 'article_detail.html', context)
+
+@cache_page(60)
+def home(request):
+    navigation_items = cache.get('navigation_items')
+    if navigation_items is None:
+
+        navigation_items = get_navigation_items()
+        cache.set('navigation_items', navigation_items, 60 * 10)
+
+    context = {'navigation_items': navigation_items}
+    return render(request, 'news.html', context=context)
 
 class NewsletterView(View):
     def get(self, request):

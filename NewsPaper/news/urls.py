@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.urls import path, include
 from .management.commands.runapscheduler import Command
 from news.views import CategoryListView, subscribe
+from .views import home
 
 urlpatterns = [
     path('create/', views.create_news, name='create-news'),
@@ -22,6 +23,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path('news/', include('simpleapp.urls')),
     path('subscriptions/', views.subscriptions, name='subscriptions'),
+    path('', home, name='news'),
 ]
 
 try:

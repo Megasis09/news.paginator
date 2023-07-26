@@ -129,6 +129,24 @@ class Article(models.Model):
         from . import News
         return News.objects.filter(article=self)
 
+    def save(self, *args, **kwargs):
+
+        super().save(*args, **kwargs)
+
+
+        cache.delete(f'article_{self.id}')
+
+    def get_from_cache(self):
+        article = cache.get(f'article_{self.id}')
+        if article is None:
+
+            article = Article.objects.get(id=self.id)
+
+
+            cache.set(f'article_{self.id}', article, settings.CACHE_TIMEOUT)
+
+        return article
+
 class News(models.Model):
     def init(self, title, author, content, timestamp):
         self.title = title
