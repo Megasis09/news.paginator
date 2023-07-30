@@ -15,6 +15,31 @@ from pathlib import Path
 import redis
 import logging
 
+logger = logging.getLogger('django')
+logger.setLevel(logging.WARNING)
+
+
+console_handler_warning = logging.StreamHandler()
+console_handler_warning.setLevel(logging.WARNING)
+
+console_handler_error = logging.StreamHandler()
+console_handler_error.setLevel(logging.ERROR)
+
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+
+console_handler_warning.setFormatter(formatter)
+console_handler_error.setFormatter(formatter)
+
+logger.addHandler(console_handler_warning)
+logger.addHandler(console_handler_error)
+
+logger.debug('This is a debug message')
+logger.info('This is an info message')
+logger.warning('This is a warning message')
+logger.error('This is an error message')
+
+LOGGING_CONFIG = 'logging.yaml'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -75,6 +100,10 @@ LOGGING = {
         },
     },
 }
+
+ADMINS = [
+    ('Megasis', 'icefrost12345@mail.ru'),
+]
 
 red = redis.Redis(
     host='redis-14899.c276.us-east-1-2.ec2.cloud.redislabs.com',
@@ -151,9 +180,6 @@ APSCHEDULER_JOBS = [
     }
 ]
 
-ADMINS = [
-    ('Megasis', 'icefrost12345@mail.ru'),
-]
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
